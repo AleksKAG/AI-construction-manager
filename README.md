@@ -29,16 +29,39 @@ AI-система управления стройкой — это интелл�
 - Другие: Docker, Kubernetes, Prometheus для мониторинга.
 
  Установка
-1. Клонируйте репозиторий: `git clone https://github.com/yourusername/ai-construction-manager.git`
-2. Установите зависимости: `go mod tidy`
-3. Настройте .env файл с ключами для БД и API.
-4. Запустите: `go run main.go`
-5. Для Docker: `docker-compose up`
+# 1. Клонировать репозиторий
+git clone https://github.com/yourusername/stroy-assistent.git
+cd stroy-assistent
 
- Использование
-- API эндпоинты: `/api/estimates/create`, `/api/schedules/build`, etc.
-- Пример запроса: POST `/api/resources/monitor` с JSON телом.
-- Демо: Запустите локально и протестируйте
+# 2. Настроить окружение
+cp .env.example .env
+# Отредактировать .env: БД, Telegram токен, Yandex API ключи
+
+# 3. Запустить через Docker Compose
+docker-compose -f deployments/docker-compose.yml up --build
+
+# 4. Или локально (требуется PostgreSQL)
+go mod tidy
+go run cmd/api/main.go
+
+# 5. Примеры запросов
+curl -X POST http://localhost:8080/api/v1/projects \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Жилой дом","address":"Москва, Ленина 10","budget":15000000}'
+
+curl -X POST http://localhost:8080/api/v1/projects/1/schedule \
+  -H "Content-Type: application/json" \
+  -d '{
+    "tasks": [
+      {"id":1, "name":"Земляные работы", "duration_days":5, "dependencies":[]},
+      {"id":2, "name":"Фундамент", "duration_days":7, "dependencies":[1]},
+      {"id":3, "name":"Стены", "duration_days":14, "dependencies":[2]}
+    ]
+  }'
+
+curl -X POST http://localhost:8080/api/v1/projects/1/estimate \
+  -H "Content-Type: application/json" \
+  -d '{"tasks": [...]}'
 
 ## Автор
 Квачёв Александр — Go-разработчик  
