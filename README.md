@@ -29,22 +29,18 @@ AI-система управления стройкой — это интелл�
 - Другие: Docker, Kubernetes, Prometheus для мониторинга.
 
  Установка
-# 1. Клонировать репозиторий
+1. Клонировать репозиторий
 git clone https://github.com/yourusername/stroy-assistent.git
 cd stroy-assistent
-
-# 2. Настроить окружение
+2. Настроить окружение
 cp .env.example .env
-# Отредактировать .env: БД, Telegram токен, Yandex API ключи
-
-# 3. Запустить через Docker Compose
+Отредактировать .env: БД, Telegram токен, Yandex API ключи
+3. Запустить через Docker Compose
 docker-compose -f deployments/docker-compose.yml up --build
-
-# 4. Или локально (требуется PostgreSQL)
+4. Или локально (требуется PostgreSQL)
 go mod tidy
 go run cmd/api/main.go
-
-# 5. Примеры запросов
+5. Примеры запросов
 curl -X POST http://localhost:8080/api/v1/projects \
   -H "Content-Type: application/json" \
   -d '{"name":"Жилой дом","address":"Москва, Ленина 10","budget":15000000}'
