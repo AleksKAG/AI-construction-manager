@@ -30,7 +30,7 @@ AI-система управления стройкой — это интелл�
 
  Установка
 1. Клонировать репозиторий
-git clone https://github.com/yourusername/stroy-assistent.git
+[git clone https://github.com/yourusername/stroy-assistent.git](https://github.com/AleksKAG/AI-construction-manager.git)
 cd stroy-assistent
 2. Настроить окружение
 cp .env.example .env
