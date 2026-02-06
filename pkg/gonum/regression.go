@@ -1,6 +1,7 @@
 package gonum
 
 import (
+	"errors"
 	"math"
 
 	"gonum.org/v1/gonum/mat"
@@ -16,7 +17,7 @@ type LinearRegression struct {
 func (lr *LinearRegression) Fit(days []float64, progress []float64) error {
 	n := len(days)
 	if n != len(progress) || n < 2 {
-		return nil // недостаточно данных
+		return errors.New("недостаточно данных для обучения")
 	}
 
 	// Матрица признаков [1, x]
@@ -62,3 +63,5 @@ func (lr *LinearRegression) DaysToCompletion() float64 {
 	}
 	return (1.0 - lr.b) / lr.a
 }
+
+// Пример использования для расчета рисков: Fit на исторических данных, Predict для прогноза задержек
