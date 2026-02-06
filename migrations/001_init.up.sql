@@ -1,34 +1,36 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE TABLE projects (
-    id SERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name TEXT NOT NULL,
     address TEXT,
     start_date TIMESTAMP,
     end_date TIMESTAMP,
     budget NUMERIC(15,2),
     status TEXT DEFAULT 'planning',
+    characteristics JSONB, -- Добавлено
+    cost_estimates JSONB, -- Добавлено
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );
 
 CREATE TABLE tasks (
-    id SERIAL PRIMARY KEY,
-    project_id INTEGER NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
     name TEXT NOT NULL,
     description TEXT,
     duration_days INTEGER NOT NULL,
     start_date TIMESTAMP,
     end_date TIMESTAMP,
-    dependencies JSONB DEFAULT '[]',
+    dependencies JSONB DEFAULT '[]'::JSONB,
     actual_progress NUMERIC(3,2) DEFAULT 0,
     status TEXT DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT NOW()
 );
 
 CREATE TABLE resources (
-    id SERIAL PRIMARY KEY,
-    task_id INTEGER NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    task_id UUID NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
     type TEXT NOT NULL,
     name TEXT NOT NULL,
     quantity NUMERIC(10,2) NOT NULL,
@@ -38,14 +40,15 @@ CREATE TABLE resources (
 );
 
 CREATE TABLE documents (
-    id SERIAL PRIMARY KEY,
-    project_id INTEGER NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
     name TEXT NOT NULL,
     path TEXT NOT NULL,
     hash TEXT NOT NULL,
     stage TEXT NOT NULL,      -- 'P' or 'R'
     doc_type TEXT NOT NULL,   -- 'II' or other
     version TEXT NOT NULL,
+    parsed_data JSONB, -- Добавлено для парсинга
     changed_at TIMESTAMP DEFAULT NOW(),
     created_at TIMESTAMP DEFAULT NOW()
 );
