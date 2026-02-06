@@ -33,6 +33,8 @@ CREATE TABLE construction_objects (
     start_date DATE,
     end_date DATE,
     client_id UUID REFERENCES organizations(id) ON DELETE SET NULL,
+    characteristics JSONB, -- Добавлено для хранения характеристик (map[string]string)
+    cost_estimates JSONB, -- Добавлено для оценок (map[string]float64)
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -72,6 +74,7 @@ CREATE TABLE documents (
     uploaded_at TIMESTAMPTZ DEFAULT NOW(),
     status TEXT NOT NULL DEFAULT 'черновик' CHECK (status IN ('черновик', 'на согласовании', 'согласован', 'отклонён')),
     comments TEXT,
+    parsed_content JSONB, -- Добавлено для хранения распарсенного контента (из upload)
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -127,6 +130,7 @@ CREATE TABLE schedule_tasks (
     dependencies JSONB, -- массив UUID зависимых задач
     assigned_to UUID REFERENCES organizations(id) ON DELETE SET NULL, -- подрядчик
     status TEXT NOT NULL DEFAULT 'не начато' CHECK (status IN ('не начато', 'в работе', 'задержка', 'завершено')),
+    duration INT, -- Добавлено для Gantt
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -139,6 +143,7 @@ CREATE TABLE risks (
     probability NUMERIC(3,2) CHECK (probability BETWEEN 0 AND 1),
     impact TEXT CHECK (impact IN ('низкий', 'средний', 'высокий')),
     mitigation_plan TEXT,
+    ml_prediction JSONB, -- Добавлено для хранения ML-прогнозов (Gonum)
     detected_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -167,7 +172,6 @@ CREATE TABLE audit_log (
 );
 
 -- === ИНДЕКСЫ ===
-
 CREATE INDEX idx_construction_objects_client ON construction_objects(client_id);
 CREATE INDEX idx_project_phases_object ON project_phases(object_id);
 CREATE INDEX idx_project_phases_status ON project_phases(status);
@@ -178,3 +182,27 @@ CREATE INDEX idx_schedule_tasks_status ON schedule_tasks(status);
 CREATE INDEX idx_risks_object ON risks(object_id);
 CREATE INDEX idx_approvals_document ON approvals(document_id);
 CREATE INDEX idx_approvals_status ON approvals(status);
+
+-- === ТРИГГЕРЫ ДЛЯ АУДИТА ===
+CREATE OR REPLACE FUNCTION audit_construction_objects() RETURNS TRIGGER AS $$
+BEGIN
+    IF (TG_OP = 'DELETE') THEN
+        INSERT INTO audit_log (table_name, record_id, action, old_values)
+        VALUES (TG_RELNAME, OLD.id, 'delete', row_to_json(OLD));
+        RETURN OLD;
+    ELSIF (TG_OP = 'UPDATE') THEN
+        INSERT INTO audit_log (table_name, record_id, action, old_values, new_values)
+        VALUES (TG_RELNAME, NEW.id, 'update', row_to_json(OLD), row_to_json(NEW));
+        RETURN NEW;
+    ELSIF (TG_OP = 'INSERT') THEN
+        INSERT INTO audit_log (table_name, record_id, action, new_values)
+        VALUES (TG_RELNAME, NEW.id, 'create', row_to_json(NEW));
+        RETURN NEW;
+    END IF;
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER audit_construction_objects
+AFTER INSERT OR UPDATE OR DELETE ON construction_objects
+FOR EACH ROW EXECUTE PROCEDURE audit_construction_objects();
