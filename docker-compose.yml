@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 version: '3.8'
+=======
+
+>>>>>>> 6f9819c (1)
 services:
   postgres:
     image: postgres:16
@@ -10,14 +14,40 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+<<<<<<< HEAD
+=======
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-app} -d ${DB_NAME:-construction_ai}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+>>>>>>> 6f9819c (1)
   redis:
     image: redis:7-alpine
     ports:
       - "6379:6379"
+<<<<<<< HEAD
   app:
     build:
       context: ../..
       dockerfile: Dockerfile  # Предполагая добавленный Dockerfile
+=======
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+  app:
+    build:
+      context: ..              
+      dockerfile: Dockerfile
+>>>>>>> 6f9819c (1)
     ports:
       - "8080:8080"
     environment:
@@ -27,6 +57,7 @@ services:
       DB_USER: ${DB_USER:-app}
       DB_PASSWORD: ${DB_PASSWORD:-secret}
       REDIS_ADDR: redis:6379
+<<<<<<< HEAD
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
       JWT_SECRET: ${JWT_SECRET:-secret}
       YANDEX_API_KEY: ${YANDEX_API_KEY}
@@ -35,5 +66,26 @@ services:
       - postgres
       - redis
     restart: unless-stopped
+=======
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      JWT_SECRET: ${JWT_SECRET:-codespaces_dev_secret_2026}
+      YANDEX_API_KEY: ${YANDEX_API_KEY:-}
+      YANDEX_FOLDER_ID: ${YANDEX_FOLDER_ID:-}
+      PORT: 8080
+      ENV: development
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+>>>>>>> 6f9819c (1)
 volumes:
   pgdata:
