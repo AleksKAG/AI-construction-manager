@@ -60,6 +60,38 @@ func main() {
 	projectRepo := repository.NewProjectRepository(db, redisClient)
 	services.LoadSampleData(projectRepo) // Загрузка sample data в DB
 
+	// Serve static files
+r.Static("/static", "./web/static")
+
+// HTML pages routing
+r.LoadHTMLGlob("web/*.html")
+
+// Page routes
+r.GET("/", func(c *gin.Context) {
+    c.HTML(http.StatusOK, "index.html", gin.H{
+        "APIBase": getEnv("API_BASE", "/api/v1"),
+    })
+})
+r.GET("/login", func(c *gin.Context) {
+    c.HTML(http.StatusOK, "login.html", nil)
+})
+r.GET("/objects", func(c *gin.Context) {
+    c.HTML(http.StatusOK, "objects.html", nil)
+})
+r.GET("/object/:id", func(c *gin.Context) {
+    c.HTML(http.StatusOK, "object-detail.html", gin.H{
+        "ObjectID": c.Param("id"),
+    })
+})
+r.GET("/upload", func(c *gin.Context) {
+    c.HTML(http.StatusOK, "upload.html", nil)
+})
+r.GET("/estimates/:id", func(c *gin.Context) {
+    c.HTML(http.StatusOK, "estimates.html", gin.H{
+        "ObjectID": c.Param("id"),
+    })
+})
+
 	// Handlers
 	r := gin.Default()
 	r.Use(gin.Recovery())
