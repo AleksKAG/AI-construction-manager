@@ -19,7 +19,7 @@ require (
 
 require (
 	github.com/bytedance/sonic         v1.12.4 // indirect (или v1.11+)
-	github.com/cloudwego/base64x       v1.1.0 // indirect
+	github.com/cloudwego/base64x       v0.1.6 // indirect
 	github.com/cloudwego/iasm          v0.2.0 // indirect
 	github.com/gin-contrib/sse         v0.1.0 // indirect
 	github.com/go-playground/locales   v0.14.1 // indirect
