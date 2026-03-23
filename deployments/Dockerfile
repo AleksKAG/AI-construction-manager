@@ -1,7 +1,11 @@
 FROM golang:1.22-alpine AS builder
 
-# Устанавливаем git + необходимые пакеты (Alpine требует --no-cache)
-RUN apk add --no-cache git
+# git + стабильный прокси Go
+RUN apk add --no-cache git && \
+    apk add --no-cache ca-certificates
+
+ENV GOPROXY=https://proxy.golang.org,direct
+ENV GOSUMDB=sum.golang.org
 
 WORKDIR /app
 
@@ -13,6 +17,7 @@ COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main ./cmd/api
 
 FROM alpine:latest
+
 RUN apk --no-cache add ca-certificates
 WORKDIR /root/
 
