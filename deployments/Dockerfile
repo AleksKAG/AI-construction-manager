@@ -1,6 +1,7 @@
-FROM golang:1.21-alpine AS builder
-
+FROM golang:1.22-alpine AS builder
 WORKDIR /app
+
+# Кэшируем зависимости
 COPY go.mod go.sum ./
 RUN go mod download
 
@@ -13,6 +14,7 @@ WORKDIR /root/
 
 COPY --from=builder /app/main .
 COPY --from=builder /app/migrations ./migrations
+COPY --from=builder /app/web ./web
 
 EXPOSE 8080
 CMD ["./main"]
