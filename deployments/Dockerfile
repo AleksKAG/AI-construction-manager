@@ -1,4 +1,8 @@
 FROM golang:1.22-alpine AS builder
+
+# Устанавливаем git + необходимые пакеты (Alpine требует --no-cache)
+RUN apk add --no-cache git
+
 WORKDIR /app
 
 # Кэшируем зависимости
