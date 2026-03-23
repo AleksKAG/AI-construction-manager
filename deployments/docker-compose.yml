@@ -1,4 +1,5 @@
 version: '3.8'
+
 services:
   postgres:
     image: postgres:16
@@ -10,14 +11,21 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-app}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   redis:
     image: redis:7-alpine
     ports:
       - "6379:6379"
+
   app:
     build:
-      context: ../..
-      dockerfile: Dockerfile  # Предполагая добавленный Dockerfile
+      context: ..
+      dockerfile: deployments/Dockerfile
     ports:
       - "8080:8080"
     environment:
@@ -28,12 +36,17 @@ services:
       DB_PASSWORD: ${DB_PASSWORD:-secret}
       REDIS_ADDR: redis:6379
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
-      JWT_SECRET: ${JWT_SECRET:-secret}
+      JWT_SECRET: ${JWT_SECRET:-supersecret}
       YANDEX_API_KEY: ${YANDEX_API_KEY}
       YANDEX_FOLDER_ID: ${YANDEX_FOLDER_ID}
+      PORT: 8080
+      ENV: production
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
     restart: unless-stopped
+
 volumes:
   pgdata:
