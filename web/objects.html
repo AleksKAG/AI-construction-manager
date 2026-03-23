@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Объекты | AI Construction Manager</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <header class="header">
+        <h1>🏗️ AI Construction Manager</h1>
+        <nav class="nav">
+            <a href="/">Главная</a>
+            <a href="/objects" class="active">Объекты</a>
+            <a href="/upload">Загрузка</a>
+            <a href="#" id="logoutBtn">Выход</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div class="card">
+            <div class="card-header">
+                <h2>🏢 Строительные объекты</h2>
+                <button class="btn-primary" id="createBtn">+ Создать объект</button>
+            </div>
+            
+            <div id="loading">Загрузка...</div>
+            <table class="table hidden" id="objectsTable">
+                <thead>
+                    <tr>
+                        <th>Название</th>
+                        <th>Адрес</th>
+                        <th>Тип</th>
+                        <th>Статус</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody id="objectsBody"></tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Modal для создания/редактирования -->
+    <div id="modal" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000;">
+        <div class="card" style="width: 100%; max-width: 500px; margin: 1rem;">
+            <h3 id="modalTitle">Создать объект</h3>
+            <form id="objectForm" class="mt-2">
+                <input type="hidden" id="objectId">
+                <div class="form-group">
+                    <label>Название *</label>
+                    <input type="text" id="objName" required>
+                </div>
+                <div class="form-group">
+                    <label>Адрес</label>
+                    <input type="text" id="objAddress">
+                </div>
+                <div class="form-group">
+                    <label>Тип</label>
+                    <select id="objType">
+                        <option value="новое строительство">Новое строительство</option>
+                        <option value="реконструкция">Реконструкция</option>
+                        <option value="капитальный ремонт">Капитальный ремонт</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Статус</label>
+                    <select id="objStatus">
+                        <option value="проектирование">Проектирование</option>
+                        <option value="строительство">Строительство</option>
+                        <option value="сдан">Сдан</option>
+                        <option value="приостановлен">Приостановлен</option>
+                    </select>
+                </div>
+                <div class="flex">
+                    <button type="submit" class="btn-primary">Сохранить</button>
+                    <button type="button" class="btn-secondary" id="cancelBtn">Отмена</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        import { requireAuth, logout, apiFetch } from '/static/js/auth.js';
+        import { loadObjects, renderObjects, createObject, updateObject, deleteObject } from '/static/js/objects.js';
+        
+        if (!requireAuth()) return;
+        
+        document.getElementById('logoutBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            logout();
+        });
+        
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadObjects();
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('objectsTable').classList.remove('hidden');
+        });
+        
+        // Modal handlers
+        const modal = document.getElementById('modal');
+        document.getElementById('createBtn').addEventListener('click', () => {
+            document.getElementById('modalTitle').textContent = 'Создать объект';
+            document.getElementById('objectForm').reset();
+            document.getElementById('objectId').value = '';
+            modal.classList.remove('hidden');
+        });
+        
+        document.getElementById('cancelBtn').addEventListener('click', () => {
+            modal.classList.add('hidden');
+        });
+        
+        document.getElementById('objectForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('objectId').value;
+            const data = {
+                name: document.getElementById('objName').value,
+                address: document.getElementById('objAddress').value,
+                type: document.getElementById('objType').value,
+                status: document.getElementById('objStatus').value,
+            };
+            
+            try {
+                if (id) {
+                    await updateObject(id, data);
+                } else {
+                    await createObject(data);
+                }
+                modal.classList.add('hidden');
+                await loadObjects();
+            } catch (err) {
+                alert('Ошибка: ' + err.message);
+            }
+        });
+    </script>
+</body>
+</html>
