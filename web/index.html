@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Construction Manager</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <header class="header">
+        <h1>🏗️ AI Construction Manager</h1>
+        <nav class="nav">
+            <a href="/" class="active">Главная</a>
+            <a href="/objects">Объекты</a>
+            <a href="/upload">Загрузка</a>
+            <a href="#" id="logoutBtn">Выход</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div class="card">
+            <h2>📋 Меню</h2>
+            <div class="flex" style="flex-wrap: wrap; gap: 1rem; margin-top: 1rem;">
+                <a href="/objects" class="card" style="flex: 1; min-width: 200px; text-decoration: none; color: inherit;">
+                    <h3>🏢 Управление объектами</h3>
+                    <p>Создание, просмотр и редактирование строительных объектов</p>
+                </a>
+                <a href="/upload" class="card" style="flex: 1; min-width: 200px; text-decoration: none; color: inherit;">
+                    <h3>📤 Загрузка документов</h3>
+                    <p>Импорт смет, графиков и проектной документации (Excel, DOCX)</p>
+                </a>
+                <a href="#" class="card" style="flex: 1; min-width: 200px; text-decoration: none; color: inherit;">
+                    <h3>📊 Графики и Gantt</h3>
+                    <p>Визуализация этапов работ и контроль сроков</p>
+                </a>
+                <a href="#" class="card" style="flex: 1; min-width: 200px; text-decoration: none; color: inherit;">
+                    <h3>💰 Сметы и расчёты</h3>
+                    <p>Автоматический расчёт стоимости с учётом инфляции</p>
+                </a>
+                <a href="#" class="card" style="flex: 1; min-width: 200px; text-decoration: none; color: inherit;">
+                    <h3>⚠️ Мониторинг рисков</h3>
+                    <p>ML-прогнозирование задержек и проблем</p>
+                </a>
+                <a href="#" class="card" style="flex: 1; min-width: 200px; text-decoration: none; color: inherit;">
+                    <h3>📁 Документация</h3>
+                    <p>Архив проектной и рабочей документации стадий П и Р</p>
+                </a>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>📈 Статистика</h2>
+            <div id="stats" class="flex" style="margin-top: 1rem;">
+                <div style="flex: 1; text-align: center; padding: 1rem;">
+                    <div style="font-size: 2rem; font-weight: bold; color: var(--primary);" id="objectsCount">-</div>
+                    <div style="color: var(--text-muted);">Объектов</div>
+                </div>
+                <div style="flex: 1; text-align: center; padding: 1rem;">
+                    <div style="font-size: 2rem; font-weight: bold; color: var(--success);" id="activeCount">-</div>
+                    <div style="color: var(--text-muted);">В работе</div>
+                </div>
+                <div style="flex: 1; text-align: center; padding: 1rem;">
+                    <div style="font-size: 2rem; font-weight: bold; color: var(--warning);" id="riskCount">-</div>
+                    <div style="color: var(--text-muted);">Рисков</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { requireAuth, logout, apiFetch } from '/static/js/auth.js';
+        
+        // Проверка авторизации
+        if (!requireAuth()) return;
+        
+        // Logout handler
+        document.getElementById('logoutBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            logout();
+        });
+        
+        // Загрузка статистики
+        async function loadStats() {
+            try {
+                const objects = await apiFetch('/objects');
+                document.getElementById('objectsCount').textContent = objects.length;
+                
+                // TODO: Заменить на реальные эндпоинты
+                document.getElementById('activeCount').textContent = objects.filter(o => o.status === 'active').length;
+                document.getElementById('riskCount').textContent = '3'; // Заглушка
+            } catch (err) {
+                console.error('Failed to load stats:', err);
+            }
+        }
+        
+        loadStats();
+    </script>
+</body>
+</html>
