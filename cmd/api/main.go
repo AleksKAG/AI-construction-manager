@@ -26,9 +26,9 @@ import (
 )
 
 func main() {
-	// Загрузка .env
+	// Загрузка .env (только в development)
 	if err := godotenv.Load(); err != nil && os.Getenv("ENV") != "production" {
-		log.Println("No .env file found")
+		log.Println("No .env file found, using environment variables")
 	}
 
 	// Логгер
@@ -48,7 +48,7 @@ func main() {
 		logger.Fatal("failed to connect database: ", err)
 	}
 
-	// Миграции
+	// Автомиграции
 	db.AutoMigrate(&models.ProjectObject{}, &models.ProjectGraph{}, &models.GanttTask{})
 
 	// Redis
@@ -56,47 +56,34 @@ func main() {
 		Addr: getEnv("REDIS_ADDR", "localhost:6379"),
 	})
 
-	// Репозитории и сервисы
+	// Репозитории и sample data
 	projectRepo := repository.NewProjectRepository(db, redisClient)
-	services.LoadSampleData(projectRepo) // Загрузка sample data в DB
+	services.LoadSampleData(projectRepo)
 
-	// Serve static files
-r.Static("/static", "./web/static")
-
-// HTML pages routing
-r.LoadHTMLGlob("web/*.html")
-
-// Page routes
-r.GET("/", func(c *gin.Context) {
-    c.HTML(http.StatusOK, "index.html", gin.H{
-        "APIBase": getEnv("API_BASE", "/api/v1"),
-    })
-})
-r.GET("/login", func(c *gin.Context) {
-    c.HTML(http.StatusOK, "login.html", nil)
-})
-r.GET("/objects", func(c *gin.Context) {
-    c.HTML(http.StatusOK, "objects.html", nil)
-})
-r.GET("/object/:id", func(c *gin.Context) {
-    c.HTML(http.StatusOK, "object-detail.html", gin.H{
-        "ObjectID": c.Param("id"),
-    })
-})
-r.GET("/upload", func(c *gin.Context) {
-    c.HTML(http.StatusOK, "upload.html", nil)
-})
-r.GET("/estimates/:id", func(c *gin.Context) {
-    c.HTML(http.StatusOK, "estimates.html", gin.H{
-        "ObjectID": c.Param("id"),
-    })
-})
-
-	// Handlers
+	// ================== ГИН И РОУТЫ ==================
 	r := gin.Default()
 	r.Use(gin.Recovery())
-	r.Use(AuthMiddleware()) // Auth middleware
+	r.Use(AuthMiddleware())
 
+	// Статические файлы и HTML (если папка web/static существует — иначе просто будет 404)
+	r.Static("/static", "./web/static")
+	r.LoadHTMLGlob("web/*.html")
+
+	// HTML-страницы
+	r.GET("/", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "index.html", gin.H{"APIBase": getEnv("API_BASE", "/api/v1")})
+	})
+	r.GET("/login", func(c *gin.Context) { c.HTML(http.StatusOK, "login.html", nil) })
+	r.GET("/objects", func(c *gin.Context) { c.HTML(http.StatusOK, "objects.html", nil) })
+	r.GET("/object/:id", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "object-detail.html", gin.H{"ObjectID": c.Param("id")})
+	})
+	r.GET("/upload", func(c *gin.Context) { c.HTML(http.StatusOK, "upload.html", nil) })
+	r.GET("/estimates/:id", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "estimates.html", gin.H{"ObjectID": c.Param("id")})
+	})
+
+	// API
 	api := r.Group("/api/v1")
 	{
 		api.GET("/menu", handlers.MenuHandler)
@@ -111,21 +98,19 @@ r.GET("/estimates/:id", func(c *gin.Context) {
 		api.GET("/estimate/:id", handlers.GetEstimate(projectRepo))
 	}
 
-	// Telegram бот
+	// Telegram бот (если токен есть)
 	botToken := getEnv("TELEGRAM_BOT_TOKEN", "")
 	if botToken != "" {
 		bot, err := tgbotapi.NewBotAPI(botToken)
 		if err != nil {
 			logger.Warn("failed to init telegram bot: ", err)
 		} else {
-			// Интеграция с handlers (пример: бот использует API)
 			u := tgbotapi.NewUpdate(0)
 			u.Timeout = 60
 			updates := bot.GetUpdatesChan(u)
 			go func() {
 				for update := range updates {
 					if update.Message != nil {
-						// Обработка команд (/menu, /objects и т.д.)
 						msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Команда получена")
 						bot.Send(msg)
 					}
@@ -161,7 +146,6 @@ r.GET("/estimates/:id", func(c *gin.Context) {
 	if err := srv.Shutdown(ctx); err != nil {
 		logger.Fatal("Server forced to shutdown: ", err)
 	}
-
 	logger.Info("Server exited gracefully")
 }
 
@@ -172,7 +156,7 @@ func getEnv(key, fallback string) string {
 	return fallback
 }
 
-// AuthMiddleware - JWT auth
+// AuthMiddleware
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tokenStr := c.GetHeader("Authorization")
@@ -181,10 +165,12 @@ func AuthMiddleware() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		tokenStr = tokenStr[len("Bearer "):]
+		if len(tokenStr) > 7 && tokenStr[:7] == "Bearer " {
+			tokenStr = tokenStr[7:]
+		}
 
 		token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
-			return []byte(getEnv("JWT_SECRET", "secret")), nil
+			return []byte(getEnv("JWT_SECRET", "supersecret")), nil
 		})
 		if err != nil || !token.Valid {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
