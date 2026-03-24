@@ -1,17 +1,15 @@
-module github.com/AleksKAG/AI-construction-manager
+module github.com/AleksKAG/ai-construction-manager
 
 go 1.23
 
 require (
-	github.com/gin-gonic/gin                        v1.10.0
-	github.com/go-redis/redis/v9                    v9.6.0
+	github.com/gin-gonic/gin v1.10.0
 	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.5.3 // indirect
-	github.com/redis/go-redis/v9 v9.18.0
+	github.com/redis/go-redis/v9 v9.6.0
 	github.com/sirupsen/logrus v1.9.3
-	// github.com/nguyenthenguyen/docx
 	github.com/xuri/excelize/v2 v2.8.1
 	github.com/yandex-cloud/go-sdk v0.10.0
 	golang.org/x/crypto v0.26.0 // indirect
@@ -31,7 +29,6 @@ require (
 	github.com/go-playground/validator/v10 v10.20.0 // indirect
 	github.com/goccy/go-json v0.10.3 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
-	// github.com/jackc/pgservicefile v0.0.0-20231201235200-de7060d80cb9 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
@@ -75,7 +72,6 @@ require (
 	github.com/jackc/puddle/v2 v2.2.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/rogpeppe/go-internal v1.14.1 // indirect
-	go.uber.org/atomic v1.11.0 // indirect
 	golang.org/x/exp v0.0.0-20241009180824-f66d83c29e7c // indirect
 	golang.org/x/sync v0.8.0 // indirect
 	google.golang.org/genproto v0.0.0-20240903143218-8af14fe29dc1 // indirect
