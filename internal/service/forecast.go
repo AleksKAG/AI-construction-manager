@@ -1,8 +1,8 @@
 package service
 
 import (
-	"stroy-assistent/internal/domain"
-	"stroy-assistent/pkg/gonum"
+	"ai-construction-manager/internal/domain"
+	"ai-construction-manager/pkg/gonum"
 	"time"
 )
 

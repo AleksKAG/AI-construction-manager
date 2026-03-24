@@ -2,9 +2,9 @@ package http
 
 import (
 	"net/http"
-	"stroy-assistent/internal/domain"
-	"stroy-assistent/internal/repository/postgres"
-	"stroy-assistent/internal/service"
+	"ai-construction-manager/internal/domain"
+	"ai-construction-manager/internal/repository/postgres"
+	"ai-construction-manager/internal/service"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"

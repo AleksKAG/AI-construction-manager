@@ -1,7 +1,7 @@
 package service
 
 import (
-	"stroy-assistent/internal/domain"
+	"ai-construction-manager/internal/domain"
 	"time"
 )
 

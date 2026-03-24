@@ -3,7 +3,7 @@ package service
 import (
 	"errors"
 	"sort"
-	"stroy-assistent/internal/domain"
+	"ai-construction-manager/internal/domain"
 	"time"
 )
 

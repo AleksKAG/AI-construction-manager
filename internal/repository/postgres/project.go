@@ -3,7 +3,7 @@ package postgres
 import (
 	"context"
 	"database/sql"
-	"stroy-assistent/internal/domain"
+	"ai-construction-manager/internal/domain"
 
 	"gorm.io/gorm"
 )
