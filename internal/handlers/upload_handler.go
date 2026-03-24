@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"fmt"
-	"io/ioutil"
+	
 	"net/http"
 	"os"
 	"path/filepath"
@@ -10,8 +10,8 @@ import (
 
 	"github.com/AleksKAG/ai-construction-manager/internal/repository"
 	"github.com/gin-gonic/gin"
-	"github.com/nguyenthenguyen/docx"
-	"github.com/xuri/excelize/v2"
+	
+	
 )
 
 func UploadFile(repo repository.ProjectRepository) gin.HandlerFunc {

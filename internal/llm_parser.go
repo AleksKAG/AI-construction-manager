@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"net/http"
+	
 
 	"github.com/yandex-cloud/go-genproto/yandex/cloud/ai/foundation_models/v1"
 	ycsdk "github.com/yandex-cloud/go-sdk"
