@@ -5,7 +5,7 @@ import (
 	"errors"
 
 	"github.com/AleksKAG/ai-construction-manager/internal/models"
-	"github.com/redis/go-redis/v9"
+	
 	"gorm.io/gorm"
 )
 
@@ -23,11 +23,11 @@ type ProjectRepository interface {
 
 type projectRepo struct {
 	db    *gorm.DB
-	redis *redis.Client
+	
 }
 
-func NewProjectRepository(db *gorm.DB, redis *redis.Client) ProjectRepository {
-	return &projectRepo{db: db, redis: redis}
+func NewProjectRepository(db *gorm.DB) ProjectRepository {
+	return &projectRepo{db: db}
 }
 
 func (r *projectRepo) GetAllObjects(ctx context.Context) ([]models.ProjectObject, error) {
