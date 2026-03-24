@@ -14,6 +14,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// LLMParser — сервис для работы с Yandex GPT через HTTP API
 type LLMParser struct {
 	apiKey     string
 	folderID   string
@@ -22,8 +23,8 @@ type LLMParser struct {
 }
 
 type LLMRequest struct {
-	ModelUri          string   `json:"modelUri"`
-	CompletionOptions Options  `json:"completionOptions"`
+	ModelUri          string    `json:"modelUri"`
+	CompletionOptions Options   `json:"completionOptions"`
 	Messages          []Message `json:"messages"`
 }
 
@@ -140,11 +141,11 @@ func (p *LLMParser) ParseMeetingTranscript(ctx context.Context, text string) ([]
 	jsonText := llmResp.Result.Alternatives[0].Message.Text
 	p.logger.Debugf("LLM raw response: %s", jsonText)
 
-	// Извлекаем JSON из ответа
+	// Извлекаем JSON из ответа (модель иногда добавляет пояснения)
 	start := bytes.IndexByte([]byte(jsonText), '{')
 	end := bytes.LastIndexByte([]byte(jsonText), '}')
 	if start == -1 || end == -1 {
-		return nil, fmt.Errorf("no JSON found in response")
+		return nil, fmt.Errorf("no JSON found in response: %s", jsonText)
 	}
 
 	var result struct {
