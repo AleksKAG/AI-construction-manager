@@ -1,8 +1,8 @@
 package service
 
 import (
-	"ai-construction-manager/internal/domain"
-	"ai-construction-manager/pkg/gonum"
+	"github.com/AleksKAG/ai-construction-manager/internal/domain"
+	"github.com/AleksKAG/ai-construction-manager/pkg/gonum"
 	"time"
 )
 

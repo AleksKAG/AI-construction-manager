@@ -2,9 +2,9 @@ package http
 
 import (
 	"net/http"
-	"ai-construction-manager/internal/domain"
-	"ai-construction-manager/internal/repository/postgres"
-	"ai-construction-manager/internal/service"
+	"github.com/AleksKAG/ai-construction-manager/internal/domain"
+	"github.com/AleksKAG/ai-construction-manager/internal/repository/postgres"
+	"github.com/AleksKAG/ai-construction-manager/internal/service"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"

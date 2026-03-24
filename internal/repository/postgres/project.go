@@ -3,7 +3,7 @@ package postgres
 import (
 	"context"
 	"database/sql"
-	"ai-construction-manager/internal/domain"
+	"github.com/AleksKAG/ai-construction-manager/internal/domain"
 
 	"gorm.io/gorm"
 )

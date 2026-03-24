@@ -9,8 +9,8 @@ import (
 	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"ai-construction-manager/internal/domain"
-	"ai-construction-manager/internal/repository/postgres"
+	"github.com/AleksKAG/ai-construction-manager/internal/domain"
+	"github.com/AleksKAG/ai-construction-manager/internal/repository/postgres"
 )
 
 type Bot struct {

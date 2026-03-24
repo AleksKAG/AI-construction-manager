@@ -1,7 +1,7 @@
 package service
 
 import (
-	"ai-construction-manager/internal/domain"
+	"github.com/AleksKAG/ai-construction-manager/internal/domain"
 	"time"
 )
 
