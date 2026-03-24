@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"time"
 
-	
+	"github.com/AleksKAG/ai-construction-manager/internal/domain"
 	"github.com/sirupsen/logrus"
 )
 
@@ -140,11 +140,11 @@ func (p *LLMParser) ParseMeetingTranscript(ctx context.Context, text string) ([]
 	jsonText := llmResp.Result.Alternatives[0].Message.Text
 	p.logger.Debugf("LLM raw response: %s", jsonText)
 
-	// Извлекаем JSON из ответа (модель иногда добавляет текст до/после)
+	// Извлекаем JSON из ответа
 	start := bytes.IndexByte([]byte(jsonText), '{')
 	end := bytes.LastIndexByte([]byte(jsonText), '}')
 	if start == -1 || end == -1 {
-		return nil, fmt.Errorf("no JSON found in response: %s", jsonText)
+		return nil, fmt.Errorf("no JSON found in response")
 	}
 
 	var result struct {

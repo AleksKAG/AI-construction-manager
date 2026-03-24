@@ -2,6 +2,9 @@ package http
 
 import (
 	"net/http"
+	"strconv"
+	"time"
+
 	"github.com/AleksKAG/ai-construction-manager/internal/domain"
 	"github.com/AleksKAG/ai-construction-manager/internal/repository/postgres"
 	"github.com/AleksKAG/ai-construction-manager/internal/service"
@@ -53,15 +56,21 @@ func (h *ProjectHandler) createProject(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, gin.H{
-		"id":    project.ID,
-		"name":  project.Name,
+		"id":     project.ID,
+		"name":   project.Name,
 		"budget": project.Budget,
 	})
 }
 
 func (h *ProjectHandler) getProject(c *gin.Context) {
-	id := c.Param("id")
-	project, err := h.repo.FindByID(c.Request.Context(), id)
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+		return
+	}
+
+	project, err := h.repo.FindByID(c.Request.Context(), uint(id))
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "project not found"})
 		return
@@ -85,21 +94,25 @@ func (h *ProjectHandler) buildSchedule(c *gin.Context) {
 		return
 	}
 
-	// Преобразуем в доменные задачи
 	var tasks []domain.Task
 	for _, t := range req.Tasks {
 		tasks = append(tasks, domain.Task{
-			ID:            t.ID,
-			Name:          t.Name,
-			DurationDays:  t.DurationDays,
-			Dependencies:  t.Dependencies,
-			Status:        "pending",
+			ID:           t.ID,
+			Name:         t.Name,
+			DurationDays: t.DurationDays,
+			Dependencies: t.Dependencies,
+			Status:       "pending",
 		})
 	}
 
-	// Получаем дату начала проекта
-	projectID := c.Param("id")
-	project, err := h.repo.FindByID(c.Request.Context(), projectID)
+	projectIDStr := c.Param("id")
+	projectID, err := strconv.ParseUint(projectIDStr, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid project id"})
+		return
+	}
+
+	project, err := h.repo.FindByID(c.Request.Context(), uint(projectID))
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "project not found"})
 		return
@@ -117,14 +130,20 @@ func (h *ProjectHandler) buildSchedule(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"tasks": scheduledTasks,
+		"tasks":   scheduledTasks,
 		"message": "Gantt-график построен",
 	})
 }
 
 func (h *ProjectHandler) calculateEstimate(c *gin.Context) {
-	projectID := c.Param("id")
-	project, err := h.repo.FindByID(c.Request.Context(), projectID)
+	projectIDStr := c.Param("id")
+	projectID, err := strconv.ParseUint(projectIDStr, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid project id"})
+		return
+	}
+
+	project, err := h.repo.FindByID(c.Request.Context(), uint(projectID))
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "project not found"})
 		return
