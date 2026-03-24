@@ -1,24 +1,26 @@
 package service
 
 import (
+	"context"
+	"time"
+
 	"github.com/AleksKAG/ai-construction-manager/internal/domain"
 	"github.com/AleksKAG/ai-construction-manager/pkg/gonum"
-	"time"
 )
 
 type ForecastResult struct {
 	EstimatedCompletionDate time.Time
-	DelayRisk               string // low, medium, high
+	DelayRisk               string  // low, medium, high
 	DaysBehindSchedule      int
 	Confidence              float64 // 0..1
 }
 
-// ForecastCompletion прогнозирует дату завершения на основе фактической выработки
+// ForecastCompletion — основной метод прогнозирования
 func ForecastCompletion(project domain.Project, actualProgress []struct {
-	Day     int     // день от начала проекта
-	Progress float64 // 0.0 - 1.0
+	Day      int
+	Progress float64
 }) ForecastResult {
-	// Преобразуем данные для регрессии
+
 	var days, progress []float64
 	for _, p := range actualProgress {
 		days = append(days, float64(p.Day))
@@ -28,18 +30,15 @@ func ForecastCompletion(project domain.Project, actualProgress []struct {
 	lr := &gonum.LinearRegression{}
 	lr.Fit(days, progress)
 
-	// Прогнозируем дни до завершения
 	daysToComplete := lr.DaysToCompletion()
 
-	// Определяем риск отставания
 	risk := "low"
-	if daysToComplete > float64(project.DurationDays())*1.3 {
+	if daysToComplete > float64(project.DurationDays)*1.3 {
 		risk = "high"
-	} else if daysToComplete > float64(project.DurationDays())*1.15 {
+	} else if daysToComplete > float64(project.DurationDays)*1.15 {
 		risk = "medium"
 	}
 
-	// Рассчитываем дату завершения
 	startDate := time.Now()
 	if project.StartDate != nil {
 		startDate = *project.StartDate
@@ -49,17 +48,9 @@ func ForecastCompletion(project domain.Project, actualProgress []struct {
 	return ForecastResult{
 		EstimatedCompletionDate: completionDate,
 		DelayRisk:               risk,
-		DaysBehindSchedule:      int(daysToComplete) - project.DurationDays(),
+		DaysBehindSchedule:      int(daysToComplete) - project.DurationDays,
 		Confidence:              calculateConfidence(len(actualProgress)),
 	}
-}
-
-func (p *domain.Project) DurationDays() int {
-	total := 0
-	for _, t := range p.Tasks {
-		total += t.DurationDays
-	}
-	return total
 }
 
 func calculateConfidence(samples int) float64 {

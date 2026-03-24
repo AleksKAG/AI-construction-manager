@@ -53,6 +53,7 @@ type Document struct {
 	Stage       string `gorm:"not null"` // P (проектная), R (рабочая)
 	DocType     string `gorm:"not null"` // II (исходные данные), other
 	Version     string `gorm:"not null"` // 1.0, 1.1, 2.0
+	DurationDays int `json:"duration_days" gorm:"default:0"`
 	ChangedAt   time.Time
 	CreatedAt   time.Time `gorm:"autoCreateTime"`
 }

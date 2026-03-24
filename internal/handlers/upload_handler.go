@@ -53,14 +53,14 @@ func UploadFile(repo repository.ProjectRepository) gin.HandlerFunc {
 	}
 }
 
-// parseExcel и parseDocx как в предыдущем примере
+
 func parseExcel(filePath string) (map[string]interface{}, error) {
-	// ... (тот же код, что в вашем исходном)
-	return nil, nil // Заглушка
+	
+	return nil, nil 
 }
 
 func parseDocx(filePath string) (map[string]string, error) {
-	// ... (тот же код)
+	
 	return nil, nil // Заглушка
 }
 
