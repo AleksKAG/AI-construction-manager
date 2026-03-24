@@ -3,7 +3,7 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/AleksKAG/ai-construction-manager/internal/pkg/gonum"
+	"github.com/AleksKAG/ai-construction-manager/pkg/gonum"
 	"github.com/AleksKAG/ai-construction-manager/internal/repository"
 	"github.com/gin-gonic/gin"
 )

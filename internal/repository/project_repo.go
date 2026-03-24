@@ -5,7 +5,7 @@ import (
 	"errors"
 
 	"github.com/AleksKAG/ai-construction-manager/internal/models"
-	"github.com/go-redis/redis/v9"
+	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 

@@ -15,7 +15,7 @@ import (
 	"github.com/AleksKAG/ai-construction-manager/internal/repository"
 	"github.com/AleksKAG/ai-construction-manager/internal/services"
 	"github.com/gin-gonic/gin"
-	"github.com/go-redis/redis/v9"
+	"github.com/redis/go-redis/v9"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/joho/godotenv"
 	"github.com/sirupsen/logrus"
