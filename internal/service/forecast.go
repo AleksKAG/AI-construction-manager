@@ -1,7 +1,6 @@
 package service
 
 import (
-	"context"
 	"time"
 
 	"github.com/AleksKAG/ai-construction-manager/internal/domain"
@@ -12,10 +11,10 @@ type ForecastResult struct {
 	EstimatedCompletionDate time.Time
 	DelayRisk               string  // low, medium, high
 	DaysBehindSchedule      int
-	Confidence              float64 // 0..1
+	Confidence              float64
 }
 
-// ForecastCompletion — основной метод прогнозирования
+// ForecastCompletion — основной метод прогнозирования завершения проекта
 func ForecastCompletion(project domain.Project, actualProgress []struct {
 	Day      int
 	Progress float64
@@ -32,6 +31,7 @@ func ForecastCompletion(project domain.Project, actualProgress []struct {
 
 	daysToComplete := lr.DaysToCompletion()
 
+	// Определяем риск задержки
 	risk := "low"
 	if daysToComplete > float64(project.DurationDays)*1.3 {
 		risk = "high"
@@ -43,6 +43,7 @@ func ForecastCompletion(project domain.Project, actualProgress []struct {
 	if project.StartDate != nil {
 		startDate = *project.StartDate
 	}
+
 	completionDate := startDate.AddDate(0, 0, int(daysToComplete))
 
 	return ForecastResult{
