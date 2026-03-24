@@ -2,7 +2,6 @@ package telegram
 
 import (
 	"context"
-	
 	"fmt"
 	"log"
 	"strings"
@@ -16,7 +15,7 @@ import (
 type Bot struct {
 	api   *tgbotapi.BotAPI
 	repo  *postgres.ProjectRepository
-	admin int64 // ID администратора для безопасности
+	admin int64
 }
 
 func NewBot(token string, repo *postgres.ProjectRepository, adminID int64) (*Bot, error) {
@@ -26,6 +25,7 @@ func NewBot(token string, repo *postgres.ProjectRepository, adminID int64) (*Bot
 	}
 	api.Debug = false
 	log.Printf("Authorized on account %s", api.Self.UserName)
+
 	return &Bot{api: api, repo: repo, admin: adminID}, nil
 }
 
@@ -51,7 +51,7 @@ func (b *Bot) Start(ctx context.Context) error {
 func (b *Bot) handleUpdate(update tgbotapi.Update) {
 	msg := update.Message
 
-	// Базовая безопасность: только для админа/группы стройки
+	// Базовая безопасность
 	if msg.Chat.ID != b.admin && !strings.Contains(msg.Chat.Title, "Стройка") {
 		return
 	}
@@ -60,27 +60,27 @@ func (b *Bot) handleUpdate(update tgbotapi.Update) {
 
 	switch {
 	case strings.HasPrefix(text, "/start"):
-		b.send(msg.Chat.ID, "🏗️ СтройАссистент готов!\nКоманды:\n/add_task — добавить задачу\n/status — статус проекта")
+		b.send(msg.Chat.ID, "🏗️ СтройАссистент готов!\n\nКоманды:\n/add_task — добавить задачу\n/status — статус проекта")
 
 	case strings.HasPrefix(text, "/add_task"):
 		b.handleAddTask(msg)
 
 	case strings.HasPrefix(text, "/status"):
-		b.handleStatus(msg)
+		b.send(msg.Chat.ID, "📊 Функция /status в разработке")
 
 	default:
-		// Авто-парсинг сообщений вида "Земляные работы: 5 дней, 2 экскаватора"
 		if strings.Contains(text, ":") {
 			b.parseNaturalTask(msg)
+		} else {
+			b.send(msg.Chat.ID, "Неизвестная команда. Используйте /start для списка команд.")
 		}
 	}
 }
 
 func (b *Bot) handleAddTask(msg *tgbotapi.Message) {
-	// Простой парсер: "Земляные работы, 10 дней, 2 чел"
 	parts := strings.Split(strings.TrimPrefix(msg.Text, "/add_task"), ",")
 	if len(parts) < 2 {
-		b.send(msg.Chat.ID, "Формат: /add_task Название, 10 дней, 2 чел")
+		b.send(msg.Chat.ID, "Формат: /add_task Название задачи, 10 дней")
 		return
 	}
 
@@ -88,14 +88,14 @@ func (b *Bot) handleAddTask(msg *tgbotapi.Message) {
 		Name:         strings.TrimSpace(parts[0]),
 		DurationDays: parseInt(strings.TrimSpace(parts[1])),
 		Status:       "pending",
+		CreatedAt:    time.Now(),
 	}
 
-	// TODO: сохранить в БД (привязка к проекту по умолчанию)
+	// TODO: сохранить в БД
 	b.send(msg.Chat.ID, fmt.Sprintf("✅ Задача «%s» добавлена на %d дней", task.Name, task.DurationDays))
 }
 
 func (b *Bot) parseNaturalTask(msg *tgbotapi.Message) {
-	// Пример: "Фундамент: 7 дней, 3 рабочих, 1 бетономешалка"
 	text := strings.ToLower(msg.Text)
 	lines := strings.Split(text, "\n")
 
@@ -103,7 +103,6 @@ func (b *Bot) parseNaturalTask(msg *tgbotapi.Message) {
 		if !strings.Contains(line, ":") {
 			continue
 		}
-
 		parts := strings.SplitN(line, ":", 2)
 		name := strings.TrimSpace(parts[0])
 		details := strings.TrimSpace(parts[1])
@@ -115,7 +114,6 @@ func (b *Bot) parseNaturalTask(msg *tgbotapi.Message) {
 			CreatedAt:    time.Now(),
 		}
 
-		// TODO: сохранить в БД
 		b.send(msg.Chat.ID, fmt.Sprintf("✅ Распознана задача: %s (%d дней)", task.Name, task.DurationDays))
 	}
 }
@@ -126,7 +124,7 @@ func (b *Bot) send(chatID int64, text string) {
 	b.api.Send(msg)
 }
 
-// Вспомогательные функции парсинга
+// Вспомогательные функции
 func parseInt(s string) int {
 	var n int
 	fmt.Sscanf(strings.ReplaceAll(s, "дней", ""), "%d", &n)

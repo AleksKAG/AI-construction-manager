@@ -12,6 +12,7 @@ type Project struct {
 	EndDate     *time.Time
 	Budget      float64    `gorm:"type:numeric(15,2)"`
 	Status      string     `gorm:"default:'planning'"` // planning, active, completed, delayed
+	DurationDays int       `gorm:"default:0"`  
 	Tasks       []Task
 	Documents   []Document
 	CreatedAt   time.Time  `gorm:"autoCreateTime"`
