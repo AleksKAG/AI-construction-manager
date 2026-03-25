@@ -17,6 +17,7 @@ type GanttTask struct {
 }
 
 type ProjectGraph struct {
+	ID string `gorm:"primaryKey" json:"id"`
 	ObjectID string      `json:"object_id"`
 	Tasks    []GanttTask `json:"tasks"`
 }
