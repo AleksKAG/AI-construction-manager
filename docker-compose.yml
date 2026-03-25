@@ -6,9 +6,9 @@ services:
     ports:
       - "8080:8080"
     environment:
-      ENV: production
       PORT: 8080
-      JWT_SECRET: supersecretkey1234567890changeinproduction2026
-    restart: unless-stopped
+      DB_PATH: /app/data/app.db
+      OPENAI_API_KEY: your_key_here
     volumes:
       - ./data:/app/data
+    restart: unless-stopped

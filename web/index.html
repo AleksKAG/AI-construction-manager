@@ -95,5 +95,33 @@
         
         loadStats();
     </script>
+    <div style="margin-top:20px;">
+  <h3>AI анализ проекта</h3>
+
+  <textarea id="ai-input" rows="4" style="width:100%;" placeholder="Опиши проект..."></textarea>
+
+  <button onclick="runAI()">Запустить AI</button>
+
+  <pre id="ai-result"></pre>
+</div>
+
+<script>
+async function runAI() {
+    const text = document.getElementById("ai-input").value;
+
+    const res = await fetch("/api/v1/ai/analyze", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ text })
+    });
+
+    const data = await res.json();
+
+    document.getElementById("ai-result").innerText = data.result || data.error;
+}
+</script>
+
 </body>
 </html>
