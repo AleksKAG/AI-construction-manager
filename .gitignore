@@ -7,5 +7,4 @@ tmp
 .env
 .env.local
 .env.production
-Dockerfile
-docker-compose.yml
+deployments/
